@@ -1,5 +1,5 @@
 # load and install packages
-pkg <- c("httr", "rjson", "dplyr", "stringr")
+pkg <- c("httr", "rjson", "dplyr", "stringr", "devtools", "leaflet")
 
 new.pkg <- pkg[!(pkg %in% installed.packages())]
 
@@ -11,7 +11,10 @@ library(httr)
 library(rjson)
 library(dplyr)
 library(stringr)
+library(devtools)
 
+if (!require("leaflet")) devtools::install_github("rstudio/leaflet")
+library(leaflet)
 
 # read in data
 data <- read.csv('filepath/filename.csv')
@@ -68,6 +71,13 @@ geo.dsk <- function(addr){
 system.time(result <- do.call(rbind,lapply(as.character(sample$location),geo.dsk)))
 result <- data.frame(result)
 result <- cbind(result, sample)
+
+# create map
+leaflet(result) %>%
+addTiles() %>%
+setView(-93.65, 42.0285, zoom = 3) %>%
+addCircles(result$long, result$lat) 
+
 
 # write out data in csv
 write.csv(result,'filepath/newfilename.csv')
